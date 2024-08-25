@@ -6,12 +6,7 @@ class Departments(models.Model):
         DepartmentName = models.CharField(max_length=100)
         # first_name=models.CharField(max_length=100)
         
-class Employees(models.Model):
-        EmployeeId = models.AutoField(primary_key=True)
-        EmployeeName = models.CharField(max_length=100)
-        Department = models.ForeignKey(Departments, on_delete=models.CASCADE)
-        DateOfJoining = models.DateField()
-        PhotoFileName = models.CharField(max_length=100)
+
         
 
 class Addition(models.Model):
@@ -24,11 +19,12 @@ class Addition(models.Model):
 class Reviews(models.Model):
         id = models.AutoField(primary_key=True)
         source = models.CharField(max_length=100)
-        source_link = models.CharField(max_length=100, null=True)
-        title = models.CharField(max_length=100, null=True)
+        source_link = models.TextField(max_length=100, null=True)
+        title = models.TextField(null=True)
         description = models.TextField()
         # sentiment can be positive, negative or neutral
-        sentiment = models.CharField(max_length=100)
+        sentiment = models.CharField(max_length=100, null=True)
+        created_at = models.DateTimeField(auto_now_add=True)
         
 
 
@@ -37,9 +33,3 @@ class Reviews(models.Model):
 #         DepartmentId = IntField(primary_key=True)
 #         DepartmentName = StringField(max_length=100)
         
-# class Employees(Document):
-#         EmployeeId = IntField(primary_key=True)
-#         EmployeeName = StringField(max_length=100)
-#         Department = StringField(max_length=100)
-#         DateOfJoining = StringField(max_length=100)
-        # PhotoFileName = StringField(max_length=100)
