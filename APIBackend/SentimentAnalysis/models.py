@@ -13,15 +13,22 @@ class Employees(models.Model):
         DateOfJoining = models.DateField()
         PhotoFileName = models.CharField(max_length=100)
         
-class Test(models.Model):
-        UserId = models.AutoField(primary_key=True)
-        Name = models.CharField(max_length=100)
+
 class Addition(models.Model):
         id = models.AutoField(primary_key=True)
         num_1 = models.IntegerField()
         num_2 = models.IntegerField()
         result = models.IntegerField()
         # date = models.DateField()
+        
+class Reviews(models.Model):
+        id = models.AutoField(primary_key=True)
+        source = models.CharField(max_length=100)
+        source_link = models.CharField(max_length=100, null=True)
+        title = models.CharField(max_length=100, null=True)
+        description = models.TextField()
+        # sentiment can be positive, negative or neutral
+        sentiment = models.CharField(max_length=100)
         
 
 

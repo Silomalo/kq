@@ -3,8 +3,8 @@ from  django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from django.http.response import JsonResponse
 
-from SentimentAnalysis.models import Departments, Employees
-from SentimentAnalysis.serializers import DepartmentSerializer, EmployeeSerializer
+from SentimentAnalysis.models import Departments, Employees,Reviews
+from SentimentAnalysis.serializers import DepartmentSerializer, EmployeeSerializer,ReviewsSerializer
 from django.views.decorators.http import require_http_methods
 # Create your views here.
 from rest_framework.generics import (
@@ -15,7 +15,7 @@ from rest_framework.generics import (
     DestroyAPIView,
 )
 from rest_framework import response, status
-from .helpers import check_existing_department_name, check_existing_department_by_id
+from .helpers import check_existing_department_name, check_existing_department_by_id,check_existing_review_by_title_and_description
 from .serializers import UpdateSingleDepartmentSerializer
 from APIBackend.tasks import add_two_numbers,divide_two_numbers,scrap_data_with_beautifulsoup,scrap_data_from_site
 
@@ -34,10 +34,11 @@ class GetDepartment(GenericAPIView):
         #     scrapping = scrap_data_with_beautifulsoup.delay(web_url)
         #     print("scrapped page", i)
             
-        scrapping = scrap_data_with_beautifulsoup.delay("https://quotes.toscrape.com")
+        # scrapping = scrap_data_with_beautifulsoup.delay("https://quotes.toscrape.com")
             
         
         # scrapping = scrap_data_from_site.delay("https://www.tripadvisor.com/Airline_Review-d8729102-Reviews-or5-Kenya-Airways.html#REVIEWS")
+        scrapping = scrap_data_from_site.delay("https://www.airlineratings.com/airlines/kenya-airways/reviews")
         # print(scrapping)
         try:
             department = Departments.objects.get(DepartmentId=department_id)
@@ -103,51 +104,81 @@ class DeleteDepartment(DestroyAPIView):
             return response.Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         
-            
-            
+        
+        
+        
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        
+class GetReview(GenericAPIView):
+    serializer_class = ReviewsSerializer
+    def get(self, review_id):
+        try:
+            review = Reviews.objects.get(id=review_id)
+            review_serializer = self.serializer_class(review)
+            return response.Response(review_serializer.data, status=status.HTTP_200_OK)
+        except Reviews.DoesNotExist:
+            return response.Response({"error": "Review not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return response.Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class GetAllReviews(ListAPIView):
+    serializer_class = ReviewsSerializer
+    def get(self):
+        reviews = Reviews.objects.all()
+        review_serializer = self.serializer_class(reviews, many=True)
+        return response.Response(review_serializer.data, status=status.HTTP_200_OK)
     
-
-
-@csrf_exempt
-@require_http_methods(["GET", "POST", "PUT", "DELETE"])
-def departmentApi(request, department_id=0):
-    if request.method == 'GET':
-        if department_id == 0:
-            departments = Departments.objects.all()
-            department_serializer = DepartmentSerializer(departments, many=True)
-            return JsonResponse(department_serializer.data, safe=False)
-        else:
-            try:
-                department = Departments.objects.get(DepartmentId=department_id)
-                department_serializer = DepartmentSerializer(department)
-                return JsonResponse(department_serializer.data, safe=False)
-            except Departments.DoesNotExist:
-                return JsonResponse({"error": "Department not found"}, status=404)
-    elif request.method == 'POST':
-        department_data = JSONParser().parse(request)
-        department_serializer = DepartmentSerializer(data=department_data)
-        if department_serializer.is_valid():
-            department_serializer.save()
-            return JsonResponse("Added Successfully", safe=False)
-        return JsonResponse("Failed to Add", safe=False)
-    elif request.method == 'PUT':
-        department_data = JSONParser().parse(request)
-        print(department_data.get('DepartmentId'))
-        dept_id = department_data.get('DepartmentId')
+class CreateReview(CreateAPIView):
+    serializer_class = ReviewsSerializer
+    def post(self, request):
+        review_data = request.data
+        review_exits = check_existing_review_by_title_and_description(review_data.get('title'), review_data.get('description'))
+        if review_exits:
+            return response.Response({"error": "Review already exists"}, status=status.HTTP_409_CONFLICT)
+        review_serializer = self.serializer_class(data=review_data)
+        if review_serializer.is_valid():
+            review_serializer.save()
+            return response.Response(review_serializer.data, status=status.HTTP_201_CREATED)
+        return response.Response(review_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class UpdateReview(UpdateAPIView):
+    serializer_class = ReviewsSerializer
+    def put(self, request, review_id):
+        review_data = request.data
         try:
-            department = Departments.objects.get(DepartmentId=dept_id)
-            department_serializer = DepartmentSerializer(department, data=department_data)
-            if department_serializer.is_valid():
-                department_serializer.save()
-                return JsonResponse("Updated Successfully", safe=False)
-            return JsonResponse("Failed to Update", safe=False)
-        except Departments.DoesNotExist as e:
-            print(e)
-            return JsonResponse({"error": "Department not found"}, status=404)
-    elif request.method == 'DELETE':
+            review = Reviews.objects.get(id=review_id)
+            serializer = self.serializer_class(review, data=review_data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return response.Response(serializer.data, status=status.HTTP_200_OK)
+            return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Reviews.DoesNotExist:
+            return response.Response({"error": "Review not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return response.Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class DeleteReview(DestroyAPIView):
+    def delete(self, request, review_id):
         try:
-            department = Departments.objects.get(DepartmentId=department_id)
-            department.delete()
+            review = Reviews.objects.get(id=review_id)
+            review.delete()
             return JsonResponse("Deleted Successfully", safe=False)
-        except Departments.DoesNotExist:
-            return JsonResponse({"error": "Department not found"}, status=404)
+        except Reviews.DoesNotExist:
+            return JsonResponse({"error": "Review not found"}, status=404)
+        except Exception as e:
+            return response.Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class DeleteAllReviews(DestroyAPIView):
+    def delete(self, request):
+        try:
+            Reviews.objects.all().delete()
+            return JsonResponse("Deleted Successfully", safe=False)
+        except Reviews.DoesNotExist:
+            return JsonResponse({"error": "Review not found"}, status=404)
+        except Exception as e:
+            return response.Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
+    

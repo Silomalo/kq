@@ -8,5 +8,14 @@ urlpatterns = [
     path('department/update/<int:department_id>', views.UpdateDepartment.as_view(), name='update-department'),
     path('department/delete/<int:department_id>', views.DeleteDepartment.as_view(), name='delete-department'),
     
+    # reviews all paths 
+    path('reviews', views.GetAllReviews.as_view(), name='get-all-reviews'),
+    path('reviews/<int:review_id>', views.GetReview.as_view(), name='get-single-review'),
+    path('reviews/add', views.CreateReview.as_view(), name='create-review'),
+    path('reviews/update/<int:review_id>', views.UpdateReview.as_view(), name='update-review'),
+    path('reviews/delete/<int:review_id>', views.DeleteReview.as_view(), name='delete-review'),
+    path('reviews/destroy', views.DeleteAllReviews.as_view(), name='delete-all-reviews'),
+    # path('reviews/sentiment', views.GetReviewSentiment.as_view(), name='get-review-sentiment'),
+    
 ]
 

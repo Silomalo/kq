@@ -1,26 +1,18 @@
 # from .email import send_otp_mail
 from celery.utils.log import get_task_logger
 from celery import shared_task
-from SentimentAnalysis.serializers import AdditionSerializer
-# from APIBackend.SentimentAnalysis.models import Addition
+from SentimentAnalysis.serializers import AdditionSerializer,ReviewsSerializer
 import datetime
 from rest_framework import response, status
-
 #scrapping data with beautifulsoup
 from bs4 import BeautifulSoup
 import requests
 import csv
 
+
 logger = get_task_logger(__name__)
 
 
-# @task(name='send_otp_mail')
-# def send_otp_mail_task(time_otp, mail_id):
-#     logger.info('send otp')
-#     return send_otp_mail(time_otp, mail_id)
-
-# @shared_task(name='add_two_numbers')
-# @shared_task()
 @shared_task(name='APIBackend.tasks.add_two_numbers')
 def add_two_numbers(a, b):
     logger.info('add two numbers')
@@ -68,36 +60,91 @@ def scrap_data_with_beautifulsoup(web_url):
         writer.writerow([quotes[i].text, authors[i].text, tag[i].text])
     file.close()
     
+# @shared_task(name='APIBackend.tasks.scrap_data_from_site')
+# def scrap_data_from_site(web_url):
+#     page_to_scrape = requests.get(web_url)
+#     soup = BeautifulSoup(page_to_scrape.content, 'html.parser')
+#     print(soup.prettify())
+    # review_div = soup.find('div', class_='fIrGe')
+    
+    # if review_div:
+    #     # Find the span with the specific class within the div
+    #     review_span = review_div.find('span', class_='QewHA')
+        
+    #     if review_span:
+    #         # Extract the text from the inner span
+    #         review_text = review_span.find('span').text.strip()
+    #         print(review_text)
+    #         return review_text
+
 @shared_task(name='APIBackend.tasks.scrap_data_from_site')
 def scrap_data_from_site(web_url):
     page_to_scrape = requests.get(web_url)
     soup = BeautifulSoup(page_to_scrape.content, 'html.parser')
-    title_element = soup.find('span', class_='Qwuub')
-    description_element = soup.find('span', class_='QewHA H4 *a')
-    print(description_element)
-    if title_element:
-        print(title_element) 
-        print(title_element.text.strip())
-        return title_element.text.strip()
-    return None
-
-
     
-    # Find all titles and descriptions
-    # titles = soup.find_all('span', attrs={'class': 'Qwuub'}).text
-    title = soup.find('span', class_='Qwuub').text.strip()
-    descriptions = soup.find_all('div', attrs={'class': 'QewHA'})
-    print(title)
-    print(descriptions)
-    # Open the CSV file for writing
-    with open('tripadvisor.csv', 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(['Title', 'Description'])
+    # Find the 'a' tag with the specified class
+    review_links = soup.find_all('a', class_='w-full hover:bg-foreground-50 transition-all rounded-xl p-6 border border-foreground-100')
+    
+    reviews = []
+    for link in review_links:
+        # Find the 'h1' element for the header
+        header = link.find('h1', class_='text-lg font-semibold font-heading my-4 inline-block transition-all')
+        # Find the 'p' element for the description
+        description = link.find('p', class_='whitespace-pre-wrap w-full line-clamp-1')
         
-        # Iterate over the titles and descriptions
-        for title, description in zip(title, descriptions):
-            title_text = title.text.strip() if title else 'N/A'
-            description_text = description.find('span', attrs={'data-test-target': 'review-text'}).text.strip() if description.find('span', attrs={'data-test-target': 'review-text'}) else 'N/A'
-            writer.writerow([title_text, description_text])
-
-
+        if header and description:
+            reviews.append({
+                'header': header.text.strip(),
+                'description': description.text.strip()
+            })
+    
+    # Print or return the reviews
+    for review in reviews:
+        print(review['header'])
+        print(review['description'])
+        try:
+            my_object = {"source":"travel-review-site", "source_link":web_url, "title":review['header'], "description":review['description']}
+            serializer = ReviewsSerializer(data=my_object)
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                print("serializer is not paused ")
+            return serializer.data
+        except Exception as e:
+            print("error", e)
+            return response.Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+    
+    # return reviews
+    
+#     @shared_task(name='APIBackend.tasks.scrap_data_from_site')
+# def scrap_data_from_site(web_url):
+#     page_to_scrape = requests.get(web_url)
+#     soup = BeautifulSoup(page_to_scrape.content, 'html.parser')
+    
+#     # Find the 'a' tag with the specified class
+#     review_links = soup.find_all('a', class_='w-full hover:bg-foreground-50 transition-all rounded-xl p-6 border border-foreground-100')
+    
+#     reviews = []
+#     for link in review_links:
+#         # Find the 'h1' element for the header
+#         header = link.find('h1', class_='text-lg font-semibold font-heading my-4 inline-block transition-all')
+#         # Find the 'p' element for the description
+#         description = link.find('p', class_='whitespace-pre-wrap w-full line-clamp-1')
+#         # Get the URL from the 'href' attribute
+#         url = link['href']
+        
+#         if header and description:
+#             reviews.append({
+#                 'header': header.text.strip(),
+#                 'description': description.text.strip(),
+#                 'url': url
+#             })
+    
+#     # Print or return the reviews
+#     for review in reviews:
+#         print(review['header'])
+#         print(review['description'])
+#         print(review['url'])
+    
+#     return reviews
