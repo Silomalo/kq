@@ -6,8 +6,10 @@ We have two methods, the manual method where you have to install everything or u
 ```
 docker-compose up --build
 ```
-cd into front-end and run 
+that will start django and rabbitMQ then avail an API endpoint of :8000
+to start the front-end, cd into front-end and run 
 ```
+
 cp .env.example .env
 npm install
 npm run dev
@@ -18,6 +20,8 @@ npm run dev
 		Install celery using [this](https://docs.celeryq.dev/en/stable/django/first-steps-with-django.html#using-celery-with-django)
 		Install rabbitMQ using [this](https://www.architect.io/blog/2021-01-19/rabbitmq-docker-tutorial/)
 		
+
+To start all processes manaually 
 ```
 python manage.py runserver
 // starting rabitMQ
