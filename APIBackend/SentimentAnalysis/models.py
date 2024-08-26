@@ -26,10 +26,3 @@ class Reviews(models.Model):
         sentiment = models.CharField(max_length=100, null=True)
         created_at = models.DateTimeField(auto_now_add=True)
         
-
-
-# from mongoengine import Document, StringField, IntField
-# class Departments(Document):
-#         DepartmentId = IntField(primary_key=True)
-#         DepartmentName = StringField(max_length=100)
-        

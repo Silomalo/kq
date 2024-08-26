@@ -30,22 +30,7 @@ class TestRoute(GenericAPIView):
         numbers = run_all_tasks.delay()
         
         return response.Response({"message": "All tasks are running", "task_id": numbers.task_id}, status=status.HTTP_200_OK)
-        # I have 10 pages in my website, I want to scrap all the pages
-        # https://quotes.toscrape.com/page/10/
-        
-        # for i in range(1, 11):
-        #     web_url = f"https://quotes.toscrape.com/page/{i}/"
-        #     print(web_url)
-        #     scrapping = scrap_data_with_beautifulsoup.delay(web_url)
-        #     print("scrapped page", i)
-            
-        # scrapping = scrap_data_with_beautifulsoup.delay("https://quotes.toscrape.com")
-            
-        
-        # scrapping = scrap_data_from_site.delay("https://www.tripadvisor.com/Airline_Review-d8729102-Reviews-or5-Kenya-Airways.html#REVIEWS")
-        # print(scrapping)
-      
-        
+  
         
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         

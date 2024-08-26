@@ -200,11 +200,10 @@ def scrap_data_from_site(web_url):
     
 @shared_task(name='APIBackend.tasks.scrap_data_from_google_maps')
 def scrap_data_from_google_maps():
-    # Get the API key from the environment
-    api_key = os.getenv('GOOGLE_MAPS_API_KEY')
-    # Get the place ID from the environment
-    place_id = os.getenv('GOOGLE_MAPS_PLACE_ID')
-    # Get the URL for the Google Maps API
+    
+    # api_key = os.getenv('GOOGLE_MAPS_API_KEY')
+    # place_id = os.getenv('GOOGLE_MAPS_PLACE_ID')
+    
     url = f'https://maps.googleapis.com/maps/api/place/details/json?place_id={place_id}&fields=name,rating,reviews&key={api_key}'
     # Make a request to the Google Maps API
     response = requests.get(url)
