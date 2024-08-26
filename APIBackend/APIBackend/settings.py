@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+from datetime import timedelta
 from mongoengine import connect
 from pathlib import Path
 # Celery Configuration Options
@@ -22,16 +22,32 @@ CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'django-cache'
 
 # scheduler
+# CELERY_BEAT_SCHEDULE = {
+#       'add-every-30-seconds': {
+#         'task': 'APIBackend.tasks.add_two_numbers',
+#         'schedule': 5.0,
+#         'args': (16, 16),
+#         'options': {
+#             'expires': 15.0,
+#         },
+#     },
+# }
+# scheduler
+# CELERY_BEAT_SCHEDULE = {
+#     'add-every-30-seconds': {
+#         'task': 'APIBackend.tasks.run_all_tasks',
+#         'schedule': 5.0,
+#     },
+# }
+
+# scheduler
 CELERY_BEAT_SCHEDULE = {
-      'add-every-30-seconds': {
-        'task': 'APIBackend.tasks.add_two_numbers',
-        'schedule': 5.0,
-        'args': (16, 16),
-        'options': {
-            'expires': 15.0,
-        },
+    'add-every-10-minutes': {
+        'task': 'APIBackend.tasks.run_all_tasks',
+        'schedule': timedelta(minutes=10),
     },
 }
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

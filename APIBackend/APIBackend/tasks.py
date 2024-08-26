@@ -27,15 +27,15 @@ logger = get_task_logger(__name__)
 def run_all_tasks():
     # numbers = add_two_numbers.delay(1, 2)
     # division = divide_two_numbers.delay(5, 2)
-    # twitter = scrap_data_from_twitter.delay()
-    # scrapping = scrap_data_from_site.delay("https://www.airlineratings.com/airlines/kenya-airways/reviews")
-    # google = scrap_data_from_google_maps.delay()
+    twitter = scrap_data_from_twitter.delay()
+    scrapping = scrap_data_from_site.delay("https://www.airlineratings.com/airlines/kenya-airways/reviews")
+    google = scrap_data_from_google_maps.delay()
     sentiments = get_sentiment.delay()
     return {
         # 'numbers_task_id': numbers.id,
         # 'division_task_id': division.id,
-        # 'twitter_task_id': twitter.id,
-        # 'google_task_id': google.id,
+        'twitter_task_id': twitter.id,
+        'google_task_id': google.id,
         'sentiments_task_id': sentiments.id
     }
 

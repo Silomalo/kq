@@ -1,0 +1,15 @@
+FROM node:14
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+
+# Add this line to copy the .env file
+COPY .env .env
+
+RUN npm run build
+
+CMD ["npm", "start"]

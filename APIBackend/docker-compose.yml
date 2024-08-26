@@ -2,7 +2,9 @@ version: '3'
 
 services:
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.django
     command: >
       sh -c "python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
@@ -10,27 +12,45 @@ services:
       - .:/app
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     depends_on:
       - rabbitmq
 
   rabbitmq:
     image: rabbitmq:3-management
     ports:
-      - "15672:15672"
       - "5672:5672"
 
   celery_worker:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.django
     command: celery -A APIBackend worker -l INFO
     volumes:
       - .:/app
+    env_file:
+      - .env
     depends_on:
       - rabbitmq
 
   celery_beat:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.django
     command: celery -A APIBackend.celery beat
     volumes:
       - .:/app
+    env_file:
+      - .env
     depends_on:
       - rabbitmq
+
+  frontend:
+    build:
+      context: ./views
+      dockerfile: Dockerfile.nextjs
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./views/.env
