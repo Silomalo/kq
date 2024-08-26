@@ -23,6 +23,8 @@ from APIBackend.tasks import run_all_tasks
 class TestRoute(GenericAPIView):
     def get(self, request):
         numbers = run_all_tasks.delay()
+        
+        return response.Response({"message": "All tasks are running", "task_id": numbers.task_id}, status=status.HTTP_200_OK)
         # I have 10 pages in my website, I want to scrap all the pages
         # https://quotes.toscrape.com/page/10/
         
@@ -57,7 +59,7 @@ class GetReview(GenericAPIView):
 
 class GetAllReviews(ListAPIView):
     serializer_class = ReviewsSerializer
-    def get(self):
+    def get(self, request):
         reviews = Reviews.objects.all()
         review_serializer = self.serializer_class(reviews, many=True)
         return response.Response(review_serializer.data, status=status.HTTP_200_OK)
