@@ -15,10 +15,15 @@ from rest_framework.generics import (
     DestroyAPIView,
 )
 from rest_framework import response, status
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from .helpers import check_existing_department_name,check_existing_review_by_title_and_description
-from .serializers import UpdateSingleDepartmentSerializer
 from APIBackend.tasks import run_all_tasks
+
+class NyPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 1000
 
 class TestRoute(GenericAPIView):
     def get(self, request):
@@ -59,6 +64,8 @@ class GetReview(GenericAPIView):
 
 class GetAllReviews(ListAPIView):
     serializer_class = ReviewsSerializer
+    pagination_class = NyPagination
+    # queryset = Reviews.objects.all()
     def get(self, request):
         reviews = Reviews.objects.all()
         review_serializer = self.serializer_class(reviews, many=True)
