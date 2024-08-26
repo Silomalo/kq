@@ -4,7 +4,7 @@ import Chart from "@/components/chart";
 import Reviews from "@/components/reviews";
 async function getData() {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/reviews`,
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/reviews/negative`,
     // { next: { revalidate: 3600 } }
     { next: { revalidate: 0 } }
   );

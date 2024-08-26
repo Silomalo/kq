@@ -11,6 +11,10 @@ urlpatterns = [
     # reviews all paths 
     path('test', views.TestRoute.as_view(), name='test-routes'),
     path('reviews', views.GetAllReviews.as_view(), name='get-all-reviews'),
+    path('reviews/positive', views.GetPositiveReviewSentiment.as_view(), name='get-positive-review-sentiment'),
+    path('reviews/negative', views.GetNegativeReviewSentiment.as_view(), name='get-negative-review-sentiment'),
+    path('reviews/neutral', views.GetNeutralReviewSentiment.as_view(), name='get-neutral-review-sentiment'),
+    
     path('reviews/<int:review_id>', views.GetReview.as_view(), name='get-single-review'),
     path('reviews/add', views.CreateReview.as_view(), name='create-review'),
     path('reviews/update/<int:review_id>', views.UpdateReview.as_view(), name='update-review'),

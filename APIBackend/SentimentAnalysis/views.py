@@ -63,6 +63,29 @@ class GetAllReviews(ListAPIView):
         reviews = Reviews.objects.all()
         review_serializer = self.serializer_class(reviews, many=True)
         return response.Response(review_serializer.data, status=status.HTTP_200_OK)
+#getting review where sentiment is positive
+class GetPositiveReviewSentiment(GenericAPIView):
+    serializer_class = ReviewsSerializer
+    def get(self, request):
+        reviews = Reviews.objects.filter(sentiment='positive')
+        review_serializer = self.serializer_class(reviews, many=True)
+        return response.Response(review_serializer.data, status=status.HTTP_200_OK)
+
+#getting all reviews where sentiment is negative
+class GetNegativeReviewSentiment(GenericAPIView):
+    serializer_class = ReviewsSerializer
+    def get(self, request):
+        reviews = Reviews.objects.filter(sentiment='negative')
+        review_serializer = self.serializer_class(reviews, many=True)
+        return response.Response(review_serializer.data, status=status.HTTP_200_OK)
+    
+#getting all reviews where sentiment is neutral
+class GetNeutralReviewSentiment(GenericAPIView):
+    serializer_class = ReviewsSerializer
+    def get(self, request):
+        reviews = Reviews.objects.filter(sentiment='neutral')
+        review_serializer = self.serializer_class(reviews, many=True)
+        return response.Response(review_serializer.data, status=status.HTTP_200_OK)
     
 class CreateReview(CreateAPIView):
     serializer_class = ReviewsSerializer

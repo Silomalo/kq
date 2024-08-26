@@ -24,7 +24,7 @@ export default function Navbar() {
     },
   ];
   return (
-    <div className="flex justify-center items-center sticky top-0 min-w-full">
+    <div className="flex justify-center items-center sticky top-0 min-w-full z-50">
       <div className="rounded-2xl md:rounded-full px-2 py-2 border shadow-md flex flex-wrap gap-2 md:gap-4 bg-gray-100">
         {nav_links.map((link) => (
           <Link
